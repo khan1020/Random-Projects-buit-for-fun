@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Video Downloader</title>
+    <!-- Add basic styles inline for simplicity; you can move to CSS file -->
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; color: #333; }
+        .container { max-width: 600px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { text-align: center; }
+        .input-group { display: flex; margin-bottom: 20px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px 0 0 4px; }
+        button { padding: 10px 20px; border: none; cursor: pointer; border-radius: 0 4px 4px 0; }
+        #analyze-btn { background: #ff0000; color: white; }
+        #download-btn { background: #4CAF50; color: white; width: 100%; margin-top: 10px; }
+        .hidden { display: none; }
+        .thumbnail-area { text-align: center; margin: 20px 0; }
+        img { max-width: 100%; height: auto; border-radius: 8px; }
+        #message { text-align: center; margin-top: 20px; }
+        .download-options { margin-top: 20px; }
+        select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Private Video Downloader</h1>
+        <div class="input-group">
+            <input type="text" id="video-url" placeholder="Paste YouTube Link Here...">
+            <button id="analyze-btn">Analyze Video</button>
+        </div>
+
+        <div id="video-info" class="hidden">
+            <h2>Video Details:</h2>
+            <div class="thumbnail-area">
+                <img id="video-thumbnail" src="" alt="Thumbnail">
+                <p id="video-title"></p>
+            </div>
+            <div class="download-options">
+                <label for="resolution-select">Select Quality:</label>
+                <select id="resolution-select"></select>
+                <button id="download-btn">Start Download</button>
+            </div>
+        </div>
+        <p id="message"></p>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>  <!-- Adjust if not using static -->
+</body>
+</html>
