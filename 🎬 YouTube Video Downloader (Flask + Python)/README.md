@@ -1,144 +1,241 @@
-🎬 YouTube Video Downloader (Flask + Python)
+# 🎬 YouTube Video Downloader (Flask + yt-dlp)
 
-A web-based YouTube video downloader built using Flask (Python backend) and a responsive front-end interface.
-It allows users to fetch video info, select resolution, and download videos directly from YouTube in multiple qualities.
+![Status](https://img.shields.io/badge/status-Development-yellow)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-📌 Project Overview
+A **web-based YouTube video downloader** with a Flask backend and `yt-dlp` as the download engine.  
+Fetch video metadata, choose resolution, track live progress, and download the file from a browser UI.
 
-This project integrates Flask as the backend and yt-dlp as the video download engine to create a smooth, interactive downloader.
-Users can input a YouTube video URL, view available resolutions, and download the desired video — all from their browser.
+---
 
-⚙️ Technologies Used
-🔹 Frontend
+## 📋 Table of Contents
 
-HTML5, CSS3, JavaScript (Vanilla JS)
+- [Project Overview](#project-overview)  
+- [Features](#features)  
+- [Tech Stack](#tech-stack)  
+- [Folder Structure](#folder-structure)  
+- [Installation](#installation)  
+- [Usage](#usage)  
+- [API Endpoints](#api-endpoints)  
+- [How Download & Progress Work](#how-download--progress-work)  
+- [Security & Limitations](#security--limitations)  
+- [Testing Locally](#testing-locally)  
+- [Future Improvements](#future-improvements)  
+- [Author](#author)  
+- [License](#license)  
+- [Sources](#sources)
 
-Responsive design using Flexbox
+---
 
-AJAX (for communication with Flask backend)
+## 🚀 Project Overview
 
-Bootstrap (optional styling)
+This project provides a small web application that allows users to paste a YouTube video link (or ID), fetch available qualities, start a background download (via `yt-dlp`), monitor progress through a streaming endpoint, and finally download the resulting file. Temporary files are stored in `temp_downloads/` and removed after delivery.
 
-🔹 Backend
+---
 
-Python Flask (Web framework)
+## ✅ Features
 
-yt-dlp (Advanced YouTube video downloader)
+- Fetch video metadata: title, thumbnail, duration.  
+- Detect available resolutions (144p → 8K when available).  
+- Start downloads in a background thread (non-blocking).  
+- Real-time progress streaming (SSE-like endpoint returning JSON lines).  
+- Safe filename generation and temporary-storage cleanup after download.  
+- Error handling for invalid IDs, restricted/private videos, and subprocess issues.  
+- Simple, responsive front-end (HTML/CSS/JS) to interact with the API.
 
-Flask-CORS (Cross-origin support)
+---
 
-Threading (For background download execution)
+## 🧰 Tech Stack
 
-Logging & Error Handling
+- Backend: `Python` + `Flask`  
+- Downloader: `yt-dlp` (invoked via `python -m yt_dlp`)  
+- CORS: `flask-cors`  
+- Concurrency: `threading` for background downloads  
+- Logging: Python `logging` module  
+- Frontend: HTML / CSS / vanilla JavaScript (AJAX / Fetch)
 
-🚀 Features
+---
 
-✅ Fetches YouTube video information using video ID
-✅ Displays video title, thumbnail, and duration
-✅ Lists available resolutions (144p – 8K)
-✅ Allows downloading in best or custom quality
-✅ Real-time download progress tracking
-✅ Clean RESTful API endpoints
-✅ Dark mode / light mode ready (optional front-end)
-✅ Automatic temporary file cleanup after download
-✅ Responsive and mobile-friendly web UI
+## 📁 Folder Structure (suggested)
 
-🧩 Folder Structure
 Task_YTDownloader/
 │
-├── app.py                 # Main Flask backend
+├── app.py # Main Flask app (your code)
+├── requirements.txt # pip dependencies
 ├── templates/
-│   └── index.html         # Front-end UI
+│ └── index.html # Frontend UI
 ├── static/
-│   ├── style.css          # Styles
-│   └── script.js          # JavaScript (AJAX + UI)
-├── temp_downloads/        # Temporary storage for downloaded files
-└── README.md              # Project documentation
+│ ├── style.css
+│ └── script.js
+├── temp_downloads/ # Temporary download files (created at runtime)
+└── README.md
 
-⚙️ Installation & Setup
-1. Clone the Repository
+yaml
+Copy code
+
+---
+
+## ⚙️ Installation
+
+> Tested with Python 3.10+.
+
+1. Clone repo:
+```bash
 git clone https://github.com/yourusername/youtube-downloader.git
 cd youtube-downloader
+Create a virtual environment & activate:
 
-2. Create and Activate Virtual Environment
+bash
+Copy code
 python -m venv venv
-venv\Scripts\activate      # On Windows
-# OR
-source venv/bin/activate   # On macOS/Linux
+# Windows
+venv\Scripts\activate
+# macOS / Linux
+source venv/bin/activate
+Install dependencies:
 
-3. Install Dependencies
+bash
+Copy code
+pip install -r requirements.txt
+If you don't have a requirements.txt, install directly:
+
+bash
+Copy code
 pip install flask flask-cors yt-dlp
+Run the app:
 
-4. Run the App
+bash
+Copy code
 python app.py
+Open: http://127.0.0.1:5000/
 
+🧭 Usage (Quick)
+Open the UI in a browser.
 
-The server will start on:
-👉 http://127.0.0.1:5000/
+Paste YouTube video URL or ID.
 
-💻 Usage Guide
+Click Fetch Video Info — choose resolution.
 
-Open the web page in your browser.
+Click Download — the backend returns a download_id.
 
-Paste a YouTube video link or ID.
+Poll /progress/<download_id> to get live progress updates.
 
-Click “Fetch Video Info”.
+Once status is completed, GET /download-file/<download_id> to download the file. The server will remove the file after it is delivered.
 
-Select a resolution (e.g., 720p, 1080p).
+🔌 API Endpoints
+GET /
+Renders the front-end UI (index.html).
 
-Press “Download” — the progress bar will update live.
+POST /get-video-info
+Request JSON
 
-Once finished, click the Download File button to save the video.
+json
+Copy code
+{ "videoId": "VIDEO_ID" }
+Response
 
-🧠 Key Backend Endpoints
-Endpoint	Method	Description
-/	GET	Renders main UI
-/get-video-info	POST	Fetches title, duration, thumbnail, and resolutions
-/start-download	POST	Initiates download thread and returns download_id
-/progress/<download_id>	GET	Provides real-time progress updates
-/download-file/<download_id>	GET	Serves the final video file for download
-🔐 Error Handling & Logging
+json
+Copy code
+{
+  "success": true,
+  "resolutions": [{ "value": "best", "label": "Best Available Quality" }, ...],
+  "video_info": {
+    "video_id": "XXXXXXX",
+    "title": "Video Title",
+    "thumbnail": "https://...",
+    "duration": "12:34"
+  }
+}
+POST /start-download
+Request JSON
 
-Invalid video IDs are detected via regex validation.
+json
+Copy code
+{ "videoId": "VIDEO_ID", "resolution": "720p" }
+Response
 
-All subprocess and JSON errors are caught and logged.
+json
+Copy code
+{
+  "success": true,
+  "download_id": "uuid-string",
+  "filename": "Video_Title.mp4",
+  "progress_url": "/progress/<download_id>",
+  "download_url": "/download-file/<download_id>"
+}
+GET /progress/<download_id>
+Returns a streaming response (text/plain) with JSON lines representing progress updates, e.g.:
 
-Automatic cleanup removes downloaded files after transfer to save storage.
+css
+Copy code
+data: {"status":"downloading","progress":32.4}
+Polling or streaming this endpoint provides live status. It ends when status becomes completed or error.
 
-Logging outputs to console with detailed timestamps.
+GET /download-file/<download_id>
+Sends the completed video file as an attachment. On close, server attempts to delete the temporary file and progress entry.
 
-🧱 Advanced Functionalities
+🔍 How Download & Progress Work
+start-download spawns a background threading.Thread that runs yt-dlp with --newline so yt-dlp prints progress lines.
 
-Background download threads using threading.Thread
+The thread parses stdout lines (those containing [download]), extracts percentage values, and updates an in-memory download_progress dictionary keyed by download_id.
 
-Streamed server-sent progress updates
+/progress/<download_id> reads that dict repeatedly and streams JSON lines to the client whenever progress changes.
 
-Dynamic video format detection (up to 8K)
+Once yt-dlp finishes, the thread marks status completed and stores file_path and file_size. Client then downloads via /download-file/<download_id>. The server deletes the file after sending it.
 
-Safe file naming and restricted filenames
+🔐 Security & Limitations
+Only local usage recommended unless you harden the app and respect service terms. Public deployment requires rate-limiting, auth, and request validation.
 
-Timeouts and graceful error messages for restricted/private videos
+YouTube Terms of Service: Be aware of YouTube's TOS regarding content downloading. Use responsibly and only for permitted content.
 
-🌙 Future Improvements
+No persistent storage: All progress and files are stored in memory / temp folder — not a DB. This is simple but not resilient across server restarts.
 
-Add user authentication
+Resource limits: Concurrent downloads may saturate bandwidth and disk. Implement queueing, quotas, and storage limits for production.
 
-Display download speed and ETA
+Input validation: Basic video ID regex is used (^[a-zA-Z0-9_-]{11}$) — but users can still provide full URLs; your front-end should extract ID safely.
 
-Allow MP3 (audio-only) extraction
+🧪 Testing Locally
+Try videos with different qualities: short clips, HD, and private/restricted videos to observe error handling.
 
-Save user download history
+Test multiple simultaneous downloads to observe memory and disk usage.
 
-Cloud-based hosting (Render / Vercel backend)
+Use curl or Postman to call endpoints directly for automated tests.
+
+Example: fetch video info via curl
+
+bash
+Copy code
+curl -X POST http://127.0.0.1:5000/get-video-info \
+  -H "Content-Type: application/json" \
+  -d '{"videoId":"dQw4w9WgXcQ"}'
+♻️ Cleanup Behavior
+The file is removed after successful send_file and the download_progress entry is deleted.
+
+If downloads fail or the server restarts, temporary files can remain — add a cron/cleanup routine in production to purge old files (e.g., older than 24 hours).
+
+🔮 Future Improvements
+Add authentication + user download history.
+
+Persist metadata in a database.
+
+Add audio-only (MP3) extraction option.
+
+Add download queue management and rate-limiting.
+
+Dockerize the app + use a supervisor to restart threads gracefully.
+
+Add unit/integration tests for endpoints and downloader logic.
 
 🧑‍💻 Author
-
-Afzal Khan
-📍 Computer Science Student | AI & Web Developer
-🔗 GitHub: khan1020
-
-🔗 LinkedIn: shorturl.at/ysFhT
+Afzal Khan — Computer Science Student & Developer
+GitHub: https://github.com/khan1020
+LinkedIn: https://shorturl.at/ysFhT
 
 📜 License
+This project is provided under the MIT License — see LICENSE file.
 
-This project is licensed under the MIT License — free to use and modify with proper credit.
+🧾 Sources
+yt-dlp project (downloader engine) — https://github.com/yt-dlp/yt-dlp
+
+Flask documentation — https://flask.palletsprojects.com/
