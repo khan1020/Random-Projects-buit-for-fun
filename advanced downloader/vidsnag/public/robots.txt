@@ -1,0 +1,21 @@
+# Sitemap
+Sitemap: https://vidsnag.com/sitemap.xml
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow API and internal routes
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Specific crawler rules
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Crawl delay for politeness
+Crawl-delay: 1

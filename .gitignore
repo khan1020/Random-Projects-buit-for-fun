@@ -1,0 +1,29 @@
+# Dependencies (all sub-projects)
+node_modules/
+**/node_modules/
+vendor/
+**/vendor/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# Build outputs & caches
+.next/
+**/.next/
+dist/
+**/dist/
+build/
+**/build/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
