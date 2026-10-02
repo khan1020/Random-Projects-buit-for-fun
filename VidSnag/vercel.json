@@ -1,0 +1,8 @@
+{
+    "functions": {
+        "src/app/api/**/*": {
+            "maxDuration": 60,
+            "includeFiles": "bin/**, youtube_cookies.txt"
+        }
+    }
+}
